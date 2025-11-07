@@ -1,99 +1,104 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Auth Microservice
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A NestJS microservice that provides user authentication (register/login) for the launcher project. It uses Prisma with MongoDB as the persistence layer and NATS for inter-service messaging.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Features
 
-## Description
+- User registration and login (email/password)
+- JWT-based authentication (token signing/verification)
+- Prisma ORM for MongoDB access (generated client in `generated/prisma`)
+- NATS transport for microservice messaging
+- Input validation with class-validator
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Project layout
 
-## Project setup
-
-```bash
-$ npm install
+```
+auth-ms/
+├── prisma/                 # Prisma schema
+├── generated/prisma/       # Prisma client (generated)
+├── src/
+│   ├── auth/               # auth controller, service, dto
+│   ├── config/             # env/config helpers
+│   └── transports/         # nats transport
+├── .env                    # local env file
+├── dockerfile
+├── docker-compose (root)   # launched at repo root
+└── package.json
 ```
 
-## Compile and run the project
+## Important environment variables
 
-```bash
-# development
-$ npm run start
+Copy `.env.template` to `.env` and update values.
 
-# watch mode
-$ npm run start:dev
+Minimum variables used by this service (example):
 
-# production mode
-$ npm run start:prod
+```env
+PORT=3004
+NATS_SERVERS=nats://localhost:4222
+DATABASE_URL=mongodb://auth-db:27017/AuthDB?directConnection=true
+JWT_SECRET=your_jwt_secret_here
 ```
 
-## Run tests
+## Prisma setup
 
-```bash
-# unit tests
-$ npm run test
+This project uses Prisma with a custom generator output into `generated/prisma`.
 
-# e2e tests
-$ npm run test:e2e
+If you added/changed `prisma/schema.prisma`, run:
 
-# test coverage
-$ npm run test:cov
+```powershell
+npx prisma generate
 ```
 
-## Deployment
+## Running locally (development)
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+1. Install dependencies:
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+```powershell
+npm install
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+2. Start required infra:
+- NATS (locally or via docker)
+- MongoDB (see Docker recipe below or use Atlas)
 
-## Resources
+3. Start the service in watch mode:
 
-Check out a few resources that may come in handy when working with NestJS:
+```powershell
+npm run start:dev
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+The service listens on `PORT` and connects to NATS via `NATS_SERVERS`.
 
-## Support
+## Running with Docker (recommended for local integration)
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+This repo provides a root-level `docker-compose.yml` that defines `auth-db` (Mongo), `nats-server` and microservices. The root compose file lives at the repo root; start services from there:
 
-## Stay in touch
+```powershell
+# stop & remove volumes if you want a clean start
+docker-compose down -v
+# start the db first so replica set initialization can complete
+docker-compose up -d auth-db
+# follow logs and wait until the replica set is initialized
+docker-compose logs -f auth-db
+# start the rest
+docker-compose up -d auth-ms nats-server
+```
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Notes:
+- If you use the single-node replica set approach, the compose file starts Mongo with `--replSet` and a healthcheck that initializes `rs0`.
+- For development only you can run Mongo without authentication and without keyfile (easier), but do not use that in production.
 
-## License
+## API / Message patterns
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+This service primarily exposes functionality through NestJS message patterns (NATS). It also contains controller code for local testing.
+
+- NATS (Message Patterns):
+	- `auth.register` (or similar) — register user (check `auth.controller.ts` / `auth.service.ts` for exact patterns)
+	- `auth.login` — login user and return JWT
+
+If you need HTTP endpoints (client-gateway proxies requests), check `client-gateway` which calls this service via NATS.
+
+## Security & JWT
+
+- JWT secret lives in `JWT_SECRET` (or similarly named variable in your `.env`).
+- Tokens should be signed and verified using the same secret.
