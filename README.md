@@ -21,7 +21,8 @@ auth-ms/
 │   ├── config/             # env/config helpers
 │   └── transports/         # nats transport
 ├── .env                    # local env file
-├── dockerfile
+├── dockerfile              # Development Dockerfile
+├── dockerfile.prod         # Production Dockerfile
 ├── docker-compose (root)   # launched at repo root
 └── package.json
 ```
@@ -39,9 +40,8 @@ DATABASE_URL=mongodb://auth-db:27017/AuthDB?directConnection=true
 JWT_SECRET=your_jwt_secret_here
 ```
 
-## Prisma setup
-
-This project uses Prisma with a custom generator output into `generated/prisma`.
+Notes:
+- Remove surrounding quotes in `.env`custom generator output into `generated/prisma`.
 
 If you added/changed `prisma/schema.prisma`, run:
 
